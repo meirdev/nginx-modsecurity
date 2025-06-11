@@ -5,7 +5,7 @@ ARG MODSEC_NGINX_VERSION="1.0.4"
 
 ARG LMDB_VERSION="0.9.31"
 
-ARG CRS_RELEASE="4.14.0"
+ARG CRS_RELEASE="4.15.0"
 
 FROM nginx:${NGINX_VERSION}-bookworm
 
@@ -50,7 +50,7 @@ RUN set -eux; \
     git clone https://github.com/owasp-modsecurity/ModSecurity --branch v${MODSEC_VERSION} --depth 1 --recursive; \
     cd ModSecurity/; \
     ./build.sh; \
-    ./configure --with-yajl --with-ssdeep --with-libmaxminddb --with-pcre2 --enable-silent-rules; \
+    ./configure --with-yajl --with-ssdeep --with-lmdb --with-libmaxminddb --with-pcre2 --enable-silent-rules; \
     make install
 
 # Install ModSecurity-nginx
