@@ -79,3 +79,10 @@ RUN curl -sSL https://github.com/coreruleset/coreruleset/releases/download/v${CR
 RUN mkdir -p /etc/maxmind; \
     curl -sSL https://github.com/P3TERX/GeoLite.mmdb/raw/download/GeoLite2-Country.mmdb -o /etc/maxmind/GeoLite2-Country.mmdb; \
     curl -sSL https://github.com/P3TERX/GeoLite.mmdb/raw/download/GeoLite2-City.mmdb -o /etc/maxmind/GeoLite2-City.mmdb
+
+RUN mkdir -p /var/log/nginx;
+RUN mkdir -p /var/tmp/nginx;
+
+ENV LD_LIBRARY_PATH=/lib:/usr/lib:/usr/local/lib:$LD_LIBRARY_PATH
+
+EXPOSE 80 443
