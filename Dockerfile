@@ -81,13 +81,6 @@ RUN set -eux; \
     chmod +x /usr/local/bin/download-latest-geolite; \
     /usr/local/bin/download-latest-geolite;
 
-RUN mkdir -p /var/log/nginx; \
-    chown -R nginx:nginx /var/log/nginx
-RUN mkdir -p /var/log/modsecurity; \
-    chown -R nginx:nginx /var/log/modsecurity;
-RUN mkdir -p /var/tmp/nginx; \
-    chown -R nginx:nginx /var/tmp/nginx;
-
 RUN mv /etc/nginx/nginx.conf /etc/nginx/nginx.conf.default
 COPY ./nginx.conf /etc/nginx/nginx.conf
 
