@@ -82,7 +82,8 @@ RUN set -eux; \
     /usr/local/bin/download-latest-geolite;
 
 RUN mv /etc/nginx/nginx.conf /etc/nginx/nginx.conf.default
-COPY ./nginx.conf /etc/nginx/nginx.conf
+COPY ./nginx/nginx.conf /etc/nginx/nginx.conf
+COPY ./nginx/conf.d/default.conf /etc/nginx/conf.d/default.conf
 
 ENV LD_LIBRARY_PATH=/lib:/usr/lib:/usr/local/lib:$LD_LIBRARY_PATH
 
