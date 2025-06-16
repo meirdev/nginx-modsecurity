@@ -65,9 +65,7 @@ RUN set -eux; \
     mkdir /etc/modsecurity.d; \
     curl -sSL https://raw.githubusercontent.com/owasp-modsecurity/ModSecurity/v3/master/unicode.mapping -o /etc/modsecurity.d/unicode.mapping
 
-
 # Install tools
-
 RUN set -eux; \
     apt install -y curl jq;
 
@@ -86,6 +84,9 @@ RUN set -eux; \
 RUN mkdir -p /var/log/nginx;
 RUN mkdir -p /var/log/modsecurity;
 RUN mkdir -p /var/tmp/nginx;
+
+RUN mv /etc/nginx/nginx.conf /etc/nginx/nginx.conf.default
+COPY ./nginx.conf /etc/nginx/nginx.conf
 
 ENV LD_LIBRARY_PATH=/lib:/usr/lib:/usr/local/lib:$LD_LIBRARY_PATH
 
