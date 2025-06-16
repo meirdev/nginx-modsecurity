@@ -1,4 +1,8 @@
-# Links
+# Nginx with ModSecurity
+
+[![Docker Image CI](https://github.com/meirdev/nginx-modsecurity/actions/workflows/docker-push.yml/badge.svg)](https://github.com/meirdev/nginx-modsecurity/actions/workflows/docker-push.yml)
+
+## Links
 
 https://github.com/coreruleset/coreruleset
 
