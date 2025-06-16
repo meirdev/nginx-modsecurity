@@ -5,15 +5,12 @@ ARG MODSEC_NGINX_VERSION="1.0.4"
 
 ARG LMDB_VERSION="0.9.31"
 
-ARG CRS_RELEASE="4.15.0"
-
 FROM nginx:${NGINX_VERSION}-bookworm
 
 ARG NGINX_VERSION
 ARG MODSEC_VERSION
 ARG MODSEC_NGINX_VERSION
 ARG LMDB_VERSION
-ARG CRS_RELEASE
 
 # Install dependencies
 RUN apt update -y; \
@@ -69,18 +66,19 @@ RUN set -eux; \
     curl -sSL https://raw.githubusercontent.com/owasp-modsecurity/ModSecurity/v3/master/unicode.mapping -o /etc/modsecurity.d/unicode.mapping
 
 # Download OWASP CRS
-RUN curl -sSL https://github.com/coreruleset/coreruleset/releases/download/v${CRS_RELEASE}/coreruleset-${CRS_RELEASE}-minimal.tar.gz -o v${CRS_RELEASE}-minimal.tar.gz; \
-    mkdir -p /etc/owasp-crs; \
-    tar -zxf v${CRS_RELEASE}-minimal.tar.gz --strip-components=1 -C /etc/owasp-crs; \
-    rm -f v${CRS_RELEASE}-minimal.tar.gz; \
-    mv -v /etc/owasp-crs/crs-setup.conf.example /etc/owasp-crs/crs-setup.conf
+COPY ./bin/download-latest-crs /usr/local/bin/download-latest-crs
+RUN set -eux; \
+    chmod +x /usr/local/bin/download-latest-crs; \
+    /usr/local/bin/download-latest-crs;
 
 # Download GeoLite2 database
-RUN mkdir -p /etc/maxmind; \
-    curl -sSL https://github.com/P3TERX/GeoLite.mmdb/raw/download/GeoLite2-Country.mmdb -o /etc/maxmind/GeoLite2-Country.mmdb; \
-    curl -sSL https://github.com/P3TERX/GeoLite.mmdb/raw/download/GeoLite2-City.mmdb -o /etc/maxmind/GeoLite2-City.mmdb
+COPY ./bin/download-latest-geolite /usr/local/bin/download-latest-geolite
+RUN set -eux; \
+    chmod +x /usr/local/bin/download-latest-geolite; \
+    /usr/local/bin/download-latest-geolite;
 
 RUN mkdir -p /var/log/nginx;
+RUN mkdir -p /var/log/modsecurity;
 RUN mkdir -p /var/tmp/nginx;
 
 ENV LD_LIBRARY_PATH=/lib:/usr/lib:/usr/local/lib:$LD_LIBRARY_PATH
