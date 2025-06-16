@@ -65,6 +65,12 @@ RUN set -eux; \
     mkdir /etc/modsecurity.d; \
     curl -sSL https://raw.githubusercontent.com/owasp-modsecurity/ModSecurity/v3/master/unicode.mapping -o /etc/modsecurity.d/unicode.mapping
 
+
+# Install tools
+
+RUN set -eux; \
+    apt install -y curl jq;
+
 # Download OWASP CRS
 COPY ./bin/download-latest-crs /usr/local/bin/download-latest-crs
 RUN set -eux; \
