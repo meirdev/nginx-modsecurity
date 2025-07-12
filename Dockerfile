@@ -137,10 +137,12 @@ RUN wget https://github.com/LMDB/lmdb/archive/refs/tags/LMDB_${LMDB_VERSION}.tar
     cd lmdb-LMDB_${LMDB_VERSION}/libraries/liblmdb && \
     make install
 
+# It seems like there's a better way to apply the patch for lua 5.4, but for now it's fine.
 RUN git clone https://github.com/owasp-modsecurity/ModSecurity --branch v${MODSEC_VERSION} --depth 1 --recursive && \
     cd ModSecurity && \
+    sed -i 's/LUA_ERRGCMM/LUA_ERRERR/' src/engine/lua.cc && \
     ./build.sh && \
-    ./configure --with-yajl --with-ssdeep --with-lmdb --with-libmaxminddb --with-pcre2 --with-lua=no --enable-silent-rules && \
+    ./configure --with-yajl --with-ssdeep --with-lmdb --with-libmaxminddb --with-pcre2 --with-lua --enable-silent-rules && \
     make install
 
 RUN wget https://github.com/owasp-modsecurity/ModSecurity-nginx/releases/download/v${MODSEC_NGINX_VERSION}/ModSecurity-nginx-v${MODSEC_NGINX_VERSION}.tar.gz && \
