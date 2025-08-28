@@ -6,7 +6,6 @@ ARG PCRE2_VERSION="10.45"
 ARG OPENSSL_VERSION="3.0.16"
 ARG ZLIB_VERSION="1.3.1"
 ARG YAJL_VERSION="2.1.0"
-ARG GEOIP_VERSION="1.6.12"
 ARG LUA_VERSION="5.4.8"
 ARG MAXMINDDB_VERSION="1.12.2"
 ARG LIBXML2_VERSION="2.14.4"
@@ -64,14 +63,6 @@ RUN wget https://www.lua.org/ftp/lua-${LUA_VERSION}.tar.gz && \
     cp /tmp/Makefile Makefile && \
     cp /tmp/src.Makefile src/Makefile && \
     make linux test && \
-    make install
-
-RUN wget https://github.com/maxmind/geoip-api-c/releases/download/v${GEOIP_VERSION}/GeoIP-${GEOIP_VERSION}.tar.gz && \
-    tar -zxf GeoIP-${GEOIP_VERSION}.tar.gz && \
-    cd GeoIP-${GEOIP_VERSION} && \
-    ./configure && \
-    make && \
-    make check && \
     make install
 
 RUN wget https://github.com/maxmind/libmaxminddb/releases/download/${MAXMINDDB_VERSION}/libmaxminddb-${MAXMINDDB_VERSION}.tar.gz && \
@@ -163,7 +154,6 @@ RUN wget https://nginx.org/download/nginx-${NGINX_VERSION}.tar.gz && \
     --with-mail=dynamic \
     --add-dynamic-module=../ModSecurity-nginx-v${MODSEC_NGINX_VERSION} \
     --with-http_ssl_module \
-    --with-http_geoip_module=dynamic \
     --with-http_sub_module \
     --with-http_v2_module \
     --with-http_addition_module \
