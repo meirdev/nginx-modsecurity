@@ -1,4 +1,5 @@
-ARG NGINX_VERSION="1.27.5"
+ARG NGINX_VERSION="1.29.3"
+ARG NGINX_NJS_VERSION="0.9.4"
 ARG MODSEC_VERSION="3.0.14"
 ARG MODSEC_NGINX_VERSION="1.0.4"
 ARG LMDB_VERSION="0.9.31"
@@ -8,7 +9,8 @@ ARG ZLIB_VERSION="1.3.1"
 ARG YAJL_VERSION="2.1.0"
 ARG LUA_VERSION="5.4.8"
 ARG MAXMINDDB_VERSION="1.12.2"
-ARG LIBXML2_VERSION="2.14.4"
+ARG LIBXML2_VERSION="2.15.1"
+ARG LIBXSLT_VERSION="1.1.43"
 ARG LIBPLS_VERSION="0.21.5"
 ARG LIBCURL_VERSION="8.14.1"
 ARG LIBFUZZY_VERSION="2.14.1"
@@ -16,6 +18,7 @@ ARG LIBFUZZY_VERSION="2.14.1"
 FROM debian:bookworm-slim AS base
 
 ARG NGINX_VERSION
+ARG NGINX_NJS_VERSION
 ARG MODSEC_VERSION
 ARG MODSEC_NGINX_VERSION
 ARG LMDB_VERSION
@@ -27,6 +30,7 @@ ARG GEOIP_VERSION
 ARG LUA_VERSION
 ARG MAXMINDDB_VERSION
 ARG LIBXML2_VERSION
+ARG LIBXSLT_VERSION
 ARG LIBPLS_VERSION
 ARG LIBCURL_VERSION
 ARG LIBFUZZY_VERSION
@@ -128,6 +132,13 @@ RUN wget https://github.com/LMDB/lmdb/archive/refs/tags/LMDB_${LMDB_VERSION}.tar
     cd lmdb-LMDB_${LMDB_VERSION}/libraries/liblmdb && \
     make install
 
+RUN wget https://download.gnome.org/sources/libxslt/${LIBXSLT_VERSION%.*}/libxslt-${LIBXSLT_VERSION}.tar.xz && \
+    tar -xf libxslt-${LIBXSLT_VERSION}.tar.xz && \
+    cd libxslt-${LIBXSLT_VERSION} && \
+    ./configure --prefix=/usr && \
+    make && \
+    make install
+
 # It seems like there's a better way to apply the patch for lua 5.4, but for now it's fine.
 RUN git clone https://github.com/owasp-modsecurity/ModSecurity --branch v${MODSEC_VERSION} --depth 1 --recursive && \
     cd ModSecurity && \
@@ -138,6 +149,8 @@ RUN git clone https://github.com/owasp-modsecurity/ModSecurity --branch v${MODSE
 
 RUN wget https://github.com/owasp-modsecurity/ModSecurity-nginx/releases/download/v${MODSEC_NGINX_VERSION}/ModSecurity-nginx-v${MODSEC_NGINX_VERSION}.tar.gz && \
     tar -zxf ModSecurity-nginx-v${MODSEC_NGINX_VERSION}.tar.gz
+
+RUN git clone https://github.com/nginx/njs --branch ${NGINX_NJS_VERSION} --depth 1
 
 RUN wget https://nginx.org/download/nginx-${NGINX_VERSION}.tar.gz && \
     tar zxf nginx-${NGINX_VERSION}.tar.gz && \
@@ -153,6 +166,7 @@ RUN wget https://nginx.org/download/nginx-${NGINX_VERSION}.tar.gz && \
     --with-stream \
     --with-mail=dynamic \
     --add-dynamic-module=../ModSecurity-nginx-v${MODSEC_NGINX_VERSION} \
+    --add-dynamic-module=../njs/nginx \
     --with-http_ssl_module \
     --with-http_sub_module \
     --with-http_v2_module \
@@ -177,6 +191,8 @@ RUN find /usr/local/lib -name "*.so" -exec strip --strip-unneeded {} \; && \
 RUN find /usr/local/modsecurity/lib -name "*.so" -exec strip --strip-unneeded {} \; && \
     find /usr/local/modsecurity/lib -name "*.a" -exec rm -f {} \;
 
+RUN find /etc/nginx/modules -name "*.so" -exec strip --strip-unneeded {} \;
+
 FROM debian:bookworm-slim
 COPY --from=base /usr/bin/nginx /usr/bin/nginx
 COPY --from=base /etc/nginx /etc/nginx
@@ -187,8 +203,9 @@ COPY --from=base /usr/local/ssl /usr/local/ssl
 COPY --from=base /usr/local/bin /usr/local/bin
 COPY --from=base /usr/local/include /usr/local/include
 COPY --from=base /usr/local/share /usr/local/share
+COPY --from=base /etc/ssl/certs /etc/ssl/certs
 
-ENV LD_LIBRARY_PATH="/lib:/usr/lib:/usr/local/lib:${LD_LIBRARY_PATH:-}"
+ENV LD_LIBRARY_PATH="/lib:/usr/lib:/usr/local/lib"
 
 RUN mkdir -p /var/cache/nginx && \
     mkdir -p /var/log/nginx && \
@@ -196,6 +213,7 @@ RUN mkdir -p /var/cache/nginx && \
 
 EXPOSE 80 443
 
+COPY nginx/njs /etc/nginx/njs
 COPY nginx/nginx.conf /etc/nginx/nginx.conf
 COPY nginx/conf.d /etc/nginx/conf.d
 
