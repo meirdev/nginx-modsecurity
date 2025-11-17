@@ -2,17 +2,14 @@
 
 set -euo pipefail
 
-GEOLITE2_CITY_MMDB_URL="https://github.com/P3TERX/GeoLite.mmdb/raw/download/GeoLite2-City.mmdb"
+GEOLITE_BASE_URL="https://github.com/P3TERX/GeoLite.mmdb/raw/download"
 
-GEOIP_DIR="/etc/modsecurity.d/geoip"
-if [[ ! -d "$GEOIP_DIR" ]]; then
-    echo "Directory $GEOIP_DIR does not exist. Creating it."
-    mkdir -p "$GEOIP_DIR"
-fi
+GEOLITE_DIR="/etc/geolite"
 
-echo "Downloading GeoLite2 City database from $GEOLITE2_CITY_MMDB_URL"
-curl -sSL "$GEOLITE2_CITY_MMDB_URL" -o "$GEOIP_DIR/GeoLite2-City.mmdb"
-if [[ $? -ne 0 ]]; then
-    echo "Failed to download the GeoLite2 City database."
-    exit 1
-fi
+GEOLITE_FILES=("GeoLite2-City.mmdb" "GeoLite2-Country.mmdb" "GeoLite2-ASN.mmdb")
+
+mkdir -p $GEOLITE_DIR
+
+for file in "${GEOLITE_FILES[@]}"; do
+    curl -L -o $GEOLITE_DIR/$file $GEOLITE_BASE_URL/$file
+done
