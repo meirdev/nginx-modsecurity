@@ -152,6 +152,8 @@ RUN wget https://github.com/owasp-modsecurity/ModSecurity-nginx/releases/downloa
 
 RUN git clone https://github.com/nginx/njs --branch ${NGINX_NJS_VERSION} --depth 1
 
+RUN git clone https://github.com/meirdev/ngx_http_geoip2_module --depth 1
+
 RUN wget https://nginx.org/download/nginx-${NGINX_VERSION}.tar.gz && \
     tar zxf nginx-${NGINX_VERSION}.tar.gz && \
     cd nginx-${NGINX_VERSION} && \
@@ -167,6 +169,7 @@ RUN wget https://nginx.org/download/nginx-${NGINX_VERSION}.tar.gz && \
     --with-mail=dynamic \
     --add-dynamic-module=../ModSecurity-nginx-v${MODSEC_NGINX_VERSION} \
     --add-dynamic-module=../njs/nginx \
+    --add-dynamic-module=../ngx_http_geoip2_module \
     --with-http_ssl_module \
     --with-http_sub_module \
     --with-http_v2_module \
