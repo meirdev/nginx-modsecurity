@@ -1,5 +1,6 @@
 ARG NGINX_VERSION="1.29.3"
 ARG NGINX_NJS_VERSION="0.9.4"
+ARG NGINX_ACME_VERSION="0.3.0"
 ARG MODSEC_VERSION="3.0.14"
 ARG MODSEC_NGINX_VERSION="1.0.4"
 ARG LMDB_VERSION="0.9.31"
@@ -19,6 +20,7 @@ FROM debian:bookworm-slim AS base
 
 ARG NGINX_VERSION
 ARG NGINX_NJS_VERSION
+ARG NGINX_ACME_VERSION
 ARG MODSEC_VERSION
 ARG MODSEC_NGINX_VERSION
 ARG LMDB_VERSION
@@ -49,7 +51,14 @@ RUN apt install -y --no-install-recommends --no-install-suggests \
     cmake \
     python3 \
     python3-dev \
-    binutils
+    binutils \
+    clang \
+    libclang-dev \
+    curl
+
+RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
+
+ENV PATH="/root/.cargo/bin:${PATH}"
 
 RUN wget https://download.gnome.org/sources/libxml2/${LIBXML2_VERSION%.*}/libxml2-${LIBXML2_VERSION}.tar.xz && \
     tar -xf libxml2-${LIBXML2_VERSION}.tar.xz && \
@@ -154,6 +163,8 @@ RUN git clone https://github.com/nginx/njs --branch ${NGINX_NJS_VERSION} --depth
 
 RUN git clone https://github.com/meirdev/ngx_http_geoip2_module --depth 1
 
+RUN git clone https://github.com/nginx/nginx-acme.git --depth 1
+
 RUN wget https://nginx.org/download/nginx-${NGINX_VERSION}.tar.gz && \
     tar zxf nginx-${NGINX_VERSION}.tar.gz && \
     cd nginx-${NGINX_VERSION} && \
@@ -170,6 +181,7 @@ RUN wget https://nginx.org/download/nginx-${NGINX_VERSION}.tar.gz && \
     --add-dynamic-module=../ModSecurity-nginx-v${MODSEC_NGINX_VERSION} \
     --add-dynamic-module=../njs/nginx \
     --add-dynamic-module=../ngx_http_geoip2_module \
+    --add-dynamic-module=../nginx-acme \
     --with-http_ssl_module \
     --with-http_sub_module \
     --with-http_v2_module \
